@@ -1,0 +1,27 @@
+{
+	"short_name": "Statify",
+	"name": "Statify",
+	"icons": [
+		{
+			"src": "favicon.ico",
+			"sizes": "256x256",
+			"type": "image/x-icon",
+			"purpose": "maskable"
+		},
+		{
+			"src": "favicon.ico",
+			"sizes": "256x256",
+			"type": "image/x-icon",
+			"purpose": "any"
+		},
+		{
+			"src": "assets/logo.png",
+			"sizes": "1024x1024",
+			"type": "image/png"
+		}
+	],
+	"start_url": ".",
+	"display": "standalone",
+	"theme_color": "#25b359",
+	"background_color": "#20262D"
+}
