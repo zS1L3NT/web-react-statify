@@ -3,7 +3,8 @@
 	"description": "A simple web app that shows your Spotify statistics",
 	"author": "zS1L3NT <zechariahtan144@gmail.com> (https://www.zectan.com)",
 	"scripts": {
-		"dev": "vite",
+		"dev": "vite --host 127.0.0.1",
+		"test": "bun test",
 		"build": "tsc && vite build",
 		"serve": "vite preview",
 		"lint": "tsc --noEmit && eslint src --fix && prettier src --write"
@@ -43,6 +44,7 @@
 		"eslint-plugin-react": "latest",
 		"eslint-plugin-simple-import-sort": "latest",
 		"prettier": "latest",
+		"react-test-renderer": "18.2.0",
 		"ts-node": "latest",
 		"typescript": "^5.1.6",
 		"vite": "^4.1.5",
