@@ -80,6 +80,8 @@ beforeEach(() => {
 	localStorage.clear()
 	sessionStorage.clear()
 	window.location.href = ""
+	window.location.origin = "https://statify.zectan.com"
+	window.location.replace = mock()
 })
 
 test("login starts Spotify authorization code with an S256 PKCE challenge", async () => {
@@ -95,6 +97,28 @@ test("login starts Spotify authorization code with an S256 PKCE challenge", asyn
 	expect(url.searchParams.get("code_challenge")).toBe(
 		createHash("sha256").update(pending.verifier).digest("base64url"),
 	)
+})
+
+test("preview login moves to the registered site before creating a PKCE verifier", async () => {
+	window.location.origin = "https://web-react-statify-8nq1wqtsx-zs1l3nts-projects.vercel.app"
+	await renderPage("/login")
+	expect(window.location.replace).toHaveBeenCalledWith("https://statify.zectan.com/login")
+	expect(sessionStorage.getItem("spotify_login")).toBeNull()
+	expect(window.location.href).toBe("")
+})
+
+test("hosted authorization always uses the registered production callback", async () => {
+	window.location.origin = "https://web-react-statify-preview.vercel.app"
+	const url = new URL(await auth.createAuthorizationUrl())
+	expect(url.searchParams.get("redirect_uri")).toBe("https://statify.zectan.com/login")
+})
+
+test("local development keeps its loopback callback on the same port", async () => {
+	window.location.origin = "http://127.0.0.1:5173"
+	await renderPage("/login")
+	const url = new URL(window.location.href)
+	expect(url.searchParams.get("redirect_uri")).toBe("http://127.0.0.1:5173/login")
+	expect(window.location.replace).not.toHaveBeenCalled()
 })
 
 test("callback exchanges the code, saves a reloadable session, and returns to the requested page", async () => {

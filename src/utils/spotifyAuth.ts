@@ -42,10 +42,18 @@ export const clearSpotifySession = () => {
 	sessionStorage.removeItem(loginKey)
 }
 
+export const getRedirectUri = () => {
+	const url = new URL("/login", window.location.origin)
+	if (url.hostname === "localhost") url.hostname = "127.0.0.1"
+	return url.hostname === "127.0.0.1" || url.hostname === "[::1]"
+		? url.href
+		: "https://statify.zectan.com/login"
+}
+
 export const createAuthorizationUrl = async () => {
 	const verifier = randomString()
 	const state = randomString()
-	const redirectUri = window.location.origin + "/login"
+	const redirectUri = getRedirectUri()
 	const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))
 	const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
 		.replace(/\+/g, "-")

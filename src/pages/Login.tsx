@@ -8,7 +8,7 @@ import { Box, Button, LinearProgress, Typography } from "@mui/material"
 import useAppDispatch from "../hooks/useAppDispatch"
 import useAppSelector from "../hooks/useAppSelector"
 import { setToken } from "../slices/TokenSlice"
-import { completeAuthorization, createAuthorizationUrl } from "../utils/spotifyAuth"
+import { completeAuthorization, createAuthorizationUrl, getRedirectUri } from "../utils/spotifyAuth"
 
 const Login = () => {
 	const navigate = useNavigate()
@@ -22,9 +22,10 @@ const Login = () => {
 
 	useEffect(() => {
 		if (isOffline) return
-		// Keep the verifier and callback on the same origin during local development.
-		if (window.location.hostname === "localhost") {
-			window.location.replace(window.location.href.replace("localhost", "127.0.0.1"))
+		// Start on the callback origin so the PKCE verifier is available after Spotify returns.
+		const redirectUri = getRedirectUri()
+		if (window.location.origin !== new URL(redirectUri).origin) {
+			window.location.replace(redirectUri)
 			return
 		}
 		let cancelled = false
