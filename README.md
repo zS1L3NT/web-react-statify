@@ -46,10 +46,10 @@ in `src/utils/spotifyAuth.ts`, register these exact redirect URIs:
 - `https://statify.zectan.com/login` (production)
 - `http://127.0.0.1:5173/login` (development)
 
-Hosted previews send sign-in to `https://statify.zectan.com/login` before contacting
-Spotify and remain on the production site after sign-in. This keeps the callback
-on a registered URL and the PKCE verifier in the same origin's session storage.
-The PKCE update must be deployed to production before this preview sign-in works.
+Hosted previews sign in and return on their own origin. Before testing a preview,
+register its exact HTTPS URL followed by `/login` in Spotify's redirect URIs.
+Use Vercel's stable branch URL to avoid registering a new URL for every deployment.
+Open that same registered branch URL when testing.
 
 Sign-in uses [authorization code with PKCE](https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow)
 in the browser. No client secret or backend is needed. Access tokens, expiry, and

@@ -99,18 +99,15 @@ test("login starts Spotify authorization code with an S256 PKCE challenge", asyn
 	)
 })
 
-test("preview login moves to the registered site before creating a PKCE verifier", async () => {
-	window.location.origin = "https://web-react-statify-8nq1wqtsx-zs1l3nts-projects.vercel.app"
-	await renderPage("/login")
-	expect(window.location.replace).toHaveBeenCalledWith("https://statify.zectan.com/login")
-	expect(sessionStorage.getItem("spotify_login")).toBeNull()
-	expect(window.location.href).toBe("")
-})
-
-test("hosted authorization always uses the registered production callback", async () => {
+test("preview login requests code on its own origin without visiting production", async () => {
 	window.location.origin = "https://web-react-statify-preview.vercel.app"
-	const url = new URL(await auth.createAuthorizationUrl())
-	expect(url.searchParams.get("redirect_uri")).toBe("https://statify.zectan.com/login")
+	await renderPage("/login")
+	for (let i = 0; i < 100 && !window.location.href; i++)
+		await new Promise(resolve => setTimeout(resolve, 5))
+	const url = new URL(window.location.href)
+	expect(url.searchParams.get("response_type")).toBe("code")
+	expect(url.searchParams.get("redirect_uri")).toBe(window.location.origin + "/login")
+	expect(window.location.replace).not.toHaveBeenCalled()
 })
 
 test("local development keeps its loopback callback on the same port", async () => {
