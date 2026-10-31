@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 
 import useAppDispatch from "../hooks/useAppDispatch"
 import { setToken } from "../slices/TokenSlice"
+import { clearSpotifySession } from "../utils/spotifyAuth"
 
 const Logout = () => {
 	const navigate = useNavigate()
@@ -10,6 +11,7 @@ const Logout = () => {
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
+		clearSpotifySession()
 		dispatch(setToken(null))
 		navigate("/")
 		sessionStorage.removeItem("redirect")

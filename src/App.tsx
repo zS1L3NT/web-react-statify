@@ -8,8 +8,6 @@ import Navigator from "./components/Navigation/Navigator"
 import ErrorDialog from "./components/Popups/ErrorDialog"
 import InfoSnackbar from "./components/Popups/InfoSnackbar"
 import PWASnackbar from "./components/Popups/PWASnackbar"
-import useAppDispatch from "./hooks/useAppDispatch"
-import useAppSelector from "./hooks/useAppSelector"
 import useThemeValue from "./hooks/useThemeValue"
 import Album from "./pages/Album"
 import Artist from "./pages/Artist"
@@ -22,12 +20,9 @@ import RecentlyPlayed from "./pages/RecentlyPlayed"
 import TopArtists from "./pages/TopArtists"
 import TopTracks from "./pages/TopTracks"
 import Track from "./pages/Track"
-import { setToken } from "./slices/TokenSlice"
 import { dark, light } from "./theme"
 
 const App = (): JSX.Element => {
-	const dispatch = useAppDispatch()
-	const token = useAppSelector(state => state.token)
 	const location = useLocation()
 
 	useEffect(() => {
@@ -44,24 +39,6 @@ const App = (): JSX.Element => {
 		window.scrollTo({ top: 0 })
 		ReactGA.send({ hitType: "pageview", page: location.pathname })
 	}, [location])
-
-	useEffect(() => {
-		if (localStorage.getItem("token")) {
-			dispatch(setToken(localStorage.getItem("token")))
-			localStorage.removeItem("token")
-		}
-
-		const beforeunload = () => {
-			if (token) {
-				localStorage.setItem("token", token)
-			}
-		}
-
-		window.addEventListener("beforeunload", beforeunload)
-		return () => {
-			window.removeEventListener("beforeunload", beforeunload)
-		}
-	}, [token])
 
 	return (
 		<ThemeProvider theme={useThemeValue(dark, light)}>

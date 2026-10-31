@@ -14,6 +14,8 @@ import {
 import useAppDispatch from "../../hooks/useAppDispatch"
 import useAppSelector from "../../hooks/useAppSelector"
 import { setError } from "../../slices/ErrorSlice"
+import { setToken } from "../../slices/TokenSlice"
+import { clearSpotifySession } from "../../utils/spotifyAuth"
 
 const ErrorDialog = () => {
 	const navigate = useNavigate()
@@ -34,6 +36,8 @@ const ErrorDialog = () => {
 		if (localError?.message.endsWith(" not found")) {
 			setTimeout(() => navigate("/"), 500)
 		} else {
+			clearSpotifySession()
+			dispatch(setToken(null))
 			if (location.pathname !== "/login") {
 				sessionStorage.setItem("redirect", location.pathname)
 			}

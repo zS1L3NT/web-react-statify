@@ -39,6 +39,21 @@ $ npm i
 $ npm run dev
 ```
 
+Open `http://127.0.0.1:5173` for local development. Spotify does not accept
+`localhost` callback URLs. In the Spotify developer dashboard for the client ID
+in `src/utils/spotifyAuth.ts`, register these exact redirect URIs:
+
+- `https://statify.zectan.com/login` (production)
+- `http://127.0.0.1:5173/login` (development)
+
+Sign-in uses [authorization code with PKCE](https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow)
+in the browser. No client secret or backend is needed. Access tokens, expiry, and
+refresh tokens are saved when Spotify returns them; expired tokens refresh before
+API requests. Existing implicit-flow sessions require one new sign-in after upgrading.
+
+Run auth regression tests with `bun test`, and verify the production build with
+`npm run build`.
+
 ## Credits
 
 [@Shockch4rge](https://github.com/Shockch4rge) introduced me to `@reduxjs/toolkit` which improved my productivity in Redux.

@@ -1,13 +1,14 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useIsOnline } from "react-use-is-online"
 
 import CloudOffIcon from "@mui/icons-material/CloudOff"
-import { Box, LinearProgress, Typography } from "@mui/material"
+import { Box, Button, LinearProgress, Typography } from "@mui/material"
 
 import useAppDispatch from "../hooks/useAppDispatch"
 import useAppSelector from "../hooks/useAppSelector"
 import { setToken } from "../slices/TokenSlice"
+import { completeAuthorization, createAuthorizationUrl } from "../utils/spotifyAuth"
 
 const Login = () => {
 	const navigate = useNavigate()
@@ -17,33 +18,46 @@ const Login = () => {
 	const dispatch = useAppDispatch()
 
 	const { isOnline, isOffline } = useIsOnline()
+	const [error, setError] = useState("")
 
 	useEffect(() => {
 		if (isOffline) return
-		if (token) return
-
-		if (location.hash) {
-			const matches = location.hash.match(/access_token=([^&]*)/)
-			if (matches) {
-				dispatch(setToken(matches[1] as string))
-			}
-
-			navigate(sessionStorage.getItem("redirect") || "/")
-			sessionStorage.removeItem("redirect")
-		} else {
-			const query = new URLSearchParams({
-				response_type: "token",
-				client_id: "042bace248d040d79bffb1e86f0c29c1",
-				// @ts-ignore
-				redirect_uri: import.meta.env.PROD
-					? "https://statify.zectan.com/login"
-					: "http://localhost:5173/login",
-				scope: "user-top-read user-read-recently-played user-follow-read user-follow-modify user-library-read user-library-modify",
-			})
-
-			window.location.href = "https://accounts.spotify.com/authorize?" + query.toString()
+		// Keep the verifier and callback on the same origin during local development.
+		if (window.location.hostname === "localhost") {
+			window.location.replace(window.location.href.replace("localhost", "127.0.0.1"))
+			return
 		}
-	}, [dispatch, location.hash, token, isOffline])
+		let cancelled = false
+		const login = async () => {
+			const params = new URLSearchParams(location.search)
+			if (params.has("code") || params.has("error")) {
+				const accessToken = await completeAuthorization(location.search)
+				if (cancelled) return
+				dispatch(setToken(accessToken))
+			} else if (!token) {
+				const url = await createAuthorizationUrl()
+				if (!cancelled) window.location.href = url
+				return
+			}
+			const redirect = sessionStorage.getItem("redirect") || "/"
+			sessionStorage.removeItem("redirect")
+			navigate(redirect, { replace: true })
+		}
+		login().catch(err => {
+			if (!cancelled) setError((err as Error).message)
+		})
+		return () => {
+			cancelled = true
+		}
+	}, [dispatch, location.search, token, isOffline, navigate])
+
+	if (error)
+		return (
+			<Box sx={{ mt: 8, textAlign: "center" }}>
+				<Typography role="alert">{error}</Typography>
+				<Button href="/login">Try again</Button>
+			</Box>
+		)
 
 	return isOnline ? (
 		<LinearProgress />
